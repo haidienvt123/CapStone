@@ -3,6 +3,7 @@ import cv2
 import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
+
 class MyVideoCapture:
     def __init__(self, video_source):
         self.vid = cv2.VideoCapture(video_source)
@@ -79,9 +80,14 @@ class App:
         self.window.after(self.delay, self.update)
 
     def takeImage(self):
-        self.image_save = self.photo
-        self.image1.create_image(0, 0, image = self.image_save, anchor = tkinter.NW)
-        self.image2.create_image(0, 0, image = self.image_save, anchor = tkinter.NW)
+        ret, frame = self.vid.get_frame()
+
+        self.image_show = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+        self.image1.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
+        self.image2.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
+
+        self.image_save = PIL.Image.fromarray(frame)
+        self.image_save.save("photo/image1.png")
 
         self.abc = self.abc+1
         self.number.config(text=str(self.abc))
