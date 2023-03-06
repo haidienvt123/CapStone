@@ -27,10 +27,11 @@
 #define SS_PIN 10
 #define RST_PIN 8
 
-const int trig = 6;     // chân trig của HC-SR04
-const int echo = 7;     // chân echo của HC-SR04
+const int trig = 6;  // chân trig của HC-SR04
+const int echo = 7;  // chân echo của HC-SR04
 
 unsigned int Gia_tri_moi;
+String choice;
 
 MFRC522 rfid(SS_PIN, RST_PIN);  // Instance of the class
 
@@ -69,11 +70,20 @@ void setup() {
   ICR1 = 40000;
   // xung răng cưa tràn sau 40000 P_clock, tương đương (20ms)
   set(4820);
-  pinMode(trig,OUTPUT);   // chân trig sẽ phát tín hiệu
-  pinMode(echo,INPUT);    // chân echo sẽ nhận tín hiệu
+  pinMode(trig, OUTPUT);  // chân trig sẽ phát tín hiệu
+  pinMode(echo, INPUT);   // chân echo sẽ nhận tín hiệu
 }
 
 void loop() {
+  if (Serial.available() != 0) {
+    choice = Serial.readStringUntil('\r');
+  }
+
+  if (choice == "On"){
+    choice = "Off";
+    opendoor();
+  }
+
 
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
   if (!rfid.PICC_IsNewCardPresent())
@@ -105,7 +115,7 @@ void loop() {
  */
 void printHex(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+    Serial.print(buffer[i] < 0x10 ? "0" : "");
     Serial.print(buffer[i], HEX);
   }
   Serial.println();
@@ -122,38 +132,37 @@ void set(unsigned int x) {
   //Độ rộng: 0.53ms - 2.41 ms
 }
 
-void opendoor(){
+void opendoor() {
   set(1060);  // 0 độ
-  delay(3000);
+  delay(500);
   // bool tf = false;
-  while ((distance() < 50) || (distance() > 500)) {
-    Serial.println(distance());
-    //delay(3000);
-  }
-  Serial.println(distance());
-  set(4820);  
+  // while ((distance() < 50) || (distance() > 500)) {
+  // while ((distance() < 0) || (distance() > 500)) {
+  //   // Serial.println(distance());
+  //   // delay(3000);
+  // }
+  // Serial.println(distance());
+  set(4820);
 }
 
 
-int distance()
-{
-    unsigned long duration; // biến đo thời gian
-    int distance1;           // biến lưu khoảng cách
-    
-    /* Phát xung từ chân trig */
-    digitalWrite(trig,0);   // tắt chân trig
-    delayMicroseconds(2);
-    digitalWrite(trig,1);   // phát xung từ chân trig
-    delayMicroseconds(5);   // xung có độ dài 5 microSeconds
-    digitalWrite(trig,0);   // tắt chân trig
-    
-    /* Tính toán thời gian */
-    // Đo độ rộng xung HIGH ở chân echo. 
-    duration = pulseIn(echo,HIGH);  
-    // Tính khoảng cách đến vật.
-    distance1 = int(duration/2/29.412);
-    delay(50);
-    /* In kết quả ra Serial Monitor */
-    return distance1;
-}
+int distance() {
+  unsigned long duration;  // biến đo thời gian
+  int distance1;           // biến lưu khoảng cách
 
+  /* Phát xung từ chân trig */
+  digitalWrite(trig, 0);  // tắt chân trig
+  delayMicroseconds(2);
+  digitalWrite(trig, 1);  // phát xung từ chân trig
+  delayMicroseconds(5);   // xung có độ dài 5 microSeconds
+  digitalWrite(trig, 0);  // tắt chân trig
+
+  /* Tính toán thời gian */
+  // Đo độ rộng xung HIGH ở chân echo.
+  duration = pulseIn(echo, HIGH);
+  // Tính khoảng cách đến vật.
+  distance1 = int(duration / 2 / 29.412);
+  delay(50);
+  /* In kết quả ra Serial Monitor */
+  return distance1;
+}
