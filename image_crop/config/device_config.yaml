@@ -1,0 +1,16 @@
+status:
+  '200': 'succeed'
+  '460': 'align error - cannot find the screen contour'
+  '461': 'screen crop - error failed to find device screen'
+  '462': 'text detector - error failed to extract text from image'
+  '463': "this device is not supported"
+  '464': "missing pulse image in Omron HEM-7600T device"
+  '465': "blurry image - image is not suitable"
+  '466': "template error - number of boxes do not correspond with the template"
+  '467': "template error - device is not in template"
+
+  
+deviceLabel:
+  BP: ["SYS", "DIA", "Pulse", "Time"]
+  SPO2: ["SPO2", "Pulse"]
+  TEMPERATURE: ["Temperature"]
