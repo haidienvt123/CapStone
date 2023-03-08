@@ -28,43 +28,46 @@ class license_id():
          y.append(int(i[1]))
       crop_img=img[min(y):max(y),min(x):max(x),:]
       return crop_img
-
-   def get_license_id(self,image_path):
-      '''
-      get the license id from image
-      input: str of image path
-      output: str of id and confidence, image with bbox
-      '''
-      try:
-         img=cv2.imread(image_path)
-      except AttributeError:
-         print("Recheck image path!")
-
-      crop,_=self.plate_detetor.detect(img)
-
-      # Paddle Text Flow
-      det = self.text_detector.detect(crop)
-
-      img_crop_list = []
-      for box in det:
-         img_crop = self.crop_image(crop, box)
-         img_crop_list.append(img_crop)
-
-      list_recognition = self.text_recognizer.detect(img_crop_list)
-
-      return list_recognition
    
-   def full_image_bbox(self,image_path):
-      try:
-         img=cv2.imread(image_path)
-      except AttributeError:
-         print("Recheck image path!")
+   def license_detect(self,image_path):
+      '''
+      get the license info from image
+      input: str of image path
+      output: str of id and confidence, image with bbox, crop image of plate license
+      '''
+      img=cv2.imread(image_path)
+      if img is None:
+         raise Exception('Recheck image path')
+      else: 
+         crop,cordinate=self.plate_detetor.detect(img)
 
-      _,cordinate=self.plate_detetor.detect(img)
+         # Paddle Text Flow
+         det = self.text_detector.detect(crop)
 
-      bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
-                                 (int(cordinate[2]),int(cordinate[3])),
-                                 color=(0,255,0),thickness=3)
+         img_crop_list = []
+         for box in det:
+            img_crop = self.crop_image(crop, box)
+            img_crop_list.append(img_crop)
+
+         list_recognition = self.text_recognizer.detect(img_crop_list)
+
+         bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
+                                    (int(cordinate[2]),int(cordinate[3])),
+                                    color=(0,255,0),thickness=3)
+
+      return list_recognition,bbox_image,crop
+   
+   # def full_image_bbox(self,image_path):
+   #    try:
+   #       img=cv2.imread(image_path)
+   #    except AttributeError:
+   #       print("Recheck image path!")
+
+   #    _,cordinate=self.plate_detetor.detect(img)
+
+   #    bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
+   #                               (int(cordinate[2]),int(cordinate[3])),
+   #                               color=(0,255,0),thickness=3)
       
-      return bbox_image
+   #    return bbox_image
 

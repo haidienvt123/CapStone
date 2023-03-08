@@ -39,19 +39,19 @@ class App:
 
         self.abc = 0
 
-        self.live1 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height)
+        self.live1 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height*0.8)
         self.live1.grid(row = 0, column = 0, pady = 2)
         #self.live1.pack()
 
-        self.image1 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height)
+        self.image1 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height*0.8)
         self.image1.grid(row = 0, column = 1, pady = 2)
         #self.image1.pack()
 
-        self.live2 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height)
+        self.live2 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height*0.8)
         self.live2.grid(row = 1, column = 0,pady = 2)
         #self.live2.pack()
 
-        self.image2 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height)
+        self.image2 = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height*0.8)
         self.image2.grid(row = 1, column = 1, pady = 2)
         #self.image2.pack()
 
@@ -94,5 +94,5 @@ class App:
         # tkinter.messagebox.showinfo(title="Notification", message="save video successful")
         print("success")
         
-App(tkinter.Tk(), "get_video","/dev/video0",30)
+App(tkinter.Tk(), "get_video",0,30)
 
