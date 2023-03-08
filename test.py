@@ -4,7 +4,7 @@ import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
 import serial
-from DL_model import license_id
+# from DL_model import license_id
 
 #read signal from port
 arduinoData = serial.Serial('/dev/ttyACM0',9600)
@@ -62,7 +62,7 @@ class App:
 
         
 
-        self.btn_getvideo=tkinter.Button(window, text="takeImage", width=50, command=self.takeImage)
+        self.btn_getvideo=tkinter.Button(window, text="takeImage", width=50, command=self.takeImage('0'))
         self.btn_getvideo.grid(row = 2, column = 0, pady = 2)
 
         self.number=tkinter.Button(window, text='0', width=50)
@@ -84,7 +84,7 @@ class App:
         self.window.after(self.delay, self.update)
     
     #take image and opendoor
-    def takeImage(self):
+    def takeImage(self,uid):
         ret, frame = self.vid.get_frame()
 
         id_str,bbox_image,crop_image=license_plate.license_detect(frame)
@@ -96,7 +96,7 @@ class App:
         self.number.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
 
         self.image_save = PIL.Image.fromarray(frame)
-        self.image_save.save("photo/image1.png")
+        self.image_save.save("photo/"+uid+'_'+id_str[1][0] + '_' + id_str[0][0]+".png")''
         
         # #send massage to arduino
         # cmd = "On"
@@ -111,19 +111,10 @@ class App:
         if (arduinoData.inWaiting()!=0):
             dataPacket = arduinoData.readline()
             dataPacket = str(dataPacket,'utf-8')
-            dataPacket = dataPacket.strip('\r\n')
-            self.number.config(text=str(dataPacket))
+            uid = dataPacket.strip('\r\n')
+            # self.number.config(text=str(dataPacket))
             # print(dataPacket)
-
-            # take
-            ret, frame = self.vid.get_frame()
-
-            self.image_show = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
-            self.image1.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
-            self.image2.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
-
-            self.image_save = PIL.Image.fromarray(frame)
-            self.image_save.save("photo/image1.png")
+            self.takeImage(uid)
         
 App(tkinter.Tk(), "get_video",'/dev/video0',30)
 
