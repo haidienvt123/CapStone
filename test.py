@@ -3,7 +3,13 @@ import cv2
 import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
+import serial
 
+#read signal from port
+arduinoData = serial.Serial('/dev/ttyACM0',9600)
+time.delay = 1000
+
+# video capture
 class MyVideoCapture:
     def __init__(self, video_source):
         self.vid = cv2.VideoCapture(video_source)
@@ -71,14 +77,17 @@ class App:
 
         self.window.mainloop()
     
+    # update live frame
     def update(self):
         ret, frame = self.vid.get_frame()
         if ret:
             self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
             self.live1.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
             self.live2.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
+        self.readUID()
         self.window.after(self.delay, self.update)
-
+    
+    #take image and opendoor
     def takeImage(self):
         ret, frame = self.vid.get_frame()
 
@@ -88,11 +97,33 @@ class App:
 
         self.image_save = PIL.Image.fromarray(frame)
         self.image_save.save("photo/image1.png")
+        
+        #send massage to arduino
+        cmd = "On"
+        cmd = cmd + '\r'
+        arduinoData.write(cmd.encode())
 
-        self.abc = self.abc+1
-        self.number.config(text=str(self.abc))
-        # tkinter.messagebox.showinfo(title="Notification", message="save video successful")
         print("success")
+
+    #Read UID card, show on bar and take iamge
+    def readUID(self):
+        #show id card 
+        if (arduinoData.inWaiting()!=0):
+            dataPacket = arduinoData.readline()
+            dataPacket = str(dataPacket,'utf-8')
+            dataPacket = dataPacket.strip('\r\n')
+            self.number.config(text=str(dataPacket))
+            # print(dataPacket)
+
+            # take
+            ret, frame = self.vid.get_frame()
+
+            self.image_show = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+            self.image1.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
+            self.image2.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
+
+            self.image_save = PIL.Image.fromarray(frame)
+            self.image_save.save("photo/image1.png")
         
 App(tkinter.Tk(), "get_video",0,30)
 
