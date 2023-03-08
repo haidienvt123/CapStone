@@ -4,10 +4,12 @@ import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
 import serial
+from DL_model import license_id
 
 #read signal from port
-arduinoData = serial.Serial('/dev/ttyACM0',9600)
-time.delay = 1000
+# arduinoData = serial.Serial('COM8',9600)
+# time.delay = 1000
+license_plate=license_id()
 
 # video capture
 class MyVideoCapture:
@@ -84,24 +86,28 @@ class App:
             self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
             self.live1.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
             self.live2.create_image(0, 0, image = self.photo, anchor = tkinter.NW)
-        self.readUID()
+        # self.readUID()
         self.window.after(self.delay, self.update)
     
     #take image and opendoor
     def takeImage(self):
         ret, frame = self.vid.get_frame()
 
-        self.image_show = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
-        self.image1.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
-        self.image2.create_image(0, 0, image = self.image_show, anchor = tkinter.NW)
+        id_str,bbox_image,crop_image=license_plate.license_detect(frame)
+
+        self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
+        self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+        self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
+        self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
+        self.number.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
 
         self.image_save = PIL.Image.fromarray(frame)
         self.image_save.save("photo/image1.png")
         
-        #send massage to arduino
-        cmd = "On"
-        cmd = cmd + '\r'
-        arduinoData.write(cmd.encode())
+        # #send massage to arduino
+        # cmd = "On"
+        # cmd = cmd + '\r'
+        # arduinoData.write(cmd.encode())
 
         print("success")
 

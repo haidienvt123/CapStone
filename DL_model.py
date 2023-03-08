@@ -10,7 +10,7 @@ from src.postprocess.postprocess import sorted_boxes
 import numpy as np
 import itertools
 import pandas as pd
-import os
+import copy
 
 class license_id():
    def __init__(self) -> None:
@@ -29,16 +29,14 @@ class license_id():
       crop_img=img[min(y):max(y),min(x):max(x),:]
       return crop_img
    
-   def license_detect(self,image_path):
+   def license_detect(self,image):
       '''
       get the license info from image
-      input: str of image path
+      input: numpy ndarray
       output: str of id and confidence, image with bbox, crop image of plate license
       '''
-      img=cv2.imread(image_path)
-      if img is None:
-         raise Exception('Recheck image path')
-      else: 
+      img=copy.deepcopy(image)
+      try:
          crop,cordinate=self.plate_detetor.detect(img)
 
          # Paddle Text Flow
@@ -54,20 +52,8 @@ class license_id():
          bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
                                     (int(cordinate[2]),int(cordinate[3])),
                                     color=(0,255,0),thickness=3)
+      except TypeError:
+         list_recognition,bbox_image,crop=('0',img,img)
 
       return list_recognition,bbox_image,crop
    
-   # def full_image_bbox(self,image_path):
-   #    try:
-   #       img=cv2.imread(image_path)
-   #    except AttributeError:
-   #       print("Recheck image path!")
-
-   #    _,cordinate=self.plate_detetor.detect(img)
-
-   #    bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
-   #                               (int(cordinate[2]),int(cordinate[3])),
-   #                               color=(0,255,0),thickness=3)
-      
-   #    return bbox_image
-
