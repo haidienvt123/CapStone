@@ -96,7 +96,11 @@ class App:
         self.number.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
 
         self.image_save = PIL.Image.fromarray(frame)
-        self.image_save.save("photo/"+uid+'_'+id_str[1][0] + '_' + id_str[0][0]+".png")''
+        self.image_save.save("photo/"+uid+".png")
+        file = open("lic/"+uid+".txt", 'w')
+        # file.write(uid + '\n' + uid)
+        file.write(id_str[1][0] + '\n' + id_str[0][0])
+        file.close()
         
         # #send massage to arduino
         # cmd = "On"
