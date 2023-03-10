@@ -97,7 +97,7 @@ class PlateDetector():
             # Rescale boxes from img_size to im0 size
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img_org.shape).round()
             *xyxy, _, _ = det[0]
-            cropped_img = save_one_box(xyxy, imc, BGR=True, save=False)
-            return cropped_img,xyxy
+            # cropped_img = save_one_box(xyxy, imc, BGR=True, save=False)
+            return xyxy
         else:
             return None
