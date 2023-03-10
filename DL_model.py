@@ -44,13 +44,17 @@ class license_id():
          crop = save_one_box(cordinate, img, BGR=True, save=False)
          # Paddle Text Flow
          det = self.text_detector.detect(crop)
+         det_ = self.text_detector.detect(img)
 
          img_crop_list = []
-         for box in det:
-            img_crop = self.crop_image(crop, box)
-            img_crop_list.append(img_crop)
+         if det is not None and det_ is not None:      
+            for box in det:
+               img_crop = self.crop_image(crop, box)
+               img_crop_list.append(img_crop)
 
-         list_recognition = self.text_recognizer.detect(img_crop_list)
+            list_recognition = self.text_recognizer.detect(img_crop_list)
+         else:
+            list_recognition = ['0','0']
 
          bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
                                     (int(cordinate[2]),int(cordinate[3])),
