@@ -103,10 +103,10 @@ class App:
         # # file.write(id_str[1][0] + '\n' + id_str[0][0])
         file.close()
         
-        # #send massage to arduino
-        # cmd = "On"
-        # cmd = cmd + '\r'
-        # arduinoData.write(cmd.encode())
+        #send massage to arduino
+        cmd = "On"
+        cmd = cmd + '\r'
+        arduinoData.write(cmd.encode())
 
         print("take")
 
@@ -129,6 +129,10 @@ class App:
             print("match")
             os.remove("lic/"+uid+".txt") 
             os.remove("photo/"+uid+".png") 
+            #send massage to arduino
+            cmd = "On"
+            cmd = cmd + '\r'
+            arduinoData.write(cmd.encode())
         else:
             print("not match")
         # #send massage to arduino
