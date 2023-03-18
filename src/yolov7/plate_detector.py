@@ -1,8 +1,8 @@
 import os
 import sys
-import torch
 import numpy as np
 from pathlib import Path
+import torch
 import cv2 
 from PIL import Image
 
