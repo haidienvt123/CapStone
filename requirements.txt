@@ -1,0 +1,39 @@
+matplotlib>=3.2.2
+numpy>=1.18.5,<1.24.0
+Pillow>=7.1.2
+PyYAML>=5.3.1
+requests>=2.23.0
+scipy>=1.4.1
+torch>=1.7.0,!=1.12.0
+torchvision>=0.8.1,!=0.13.0
+tqdm>=4.41.0
+tensorboard>=2.4.1
+pandas>=1.1.4
+seaborn>=0.11.0
+ipython  # interactive notebook
+psutil  # system utilization
+thop  # FLOPs computation
+pyserial
+
+shapely
+scikit-image
+imgaug
+pyclipper
+lmdb
+visualdl
+rapidfuzz
+opencv-python==4.6.0.66
+opencv-contrib-python==4.6.0.66
+cython
+lxml
+premailer
+openpyxl
+attrdict
+Polygon3
+lanms-neo==1.0.2
+PyMuPDF<1.21.0
+
+tk
+paddlepaddle
+imutils
+rembg

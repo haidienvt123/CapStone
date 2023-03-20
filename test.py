@@ -71,8 +71,11 @@ class App:
         self.btn_getvideo=tkinter.Button(window, text="takeImage", width=50, command=self.takeImageButton)
         self.btn_getvideo.grid(row = 2, column = 0, pady = 2)
 
-        self.number=tkinter.Button(window, text='0', width=50)
-        self.number.grid(row = 2, column = 1, pady = 2)
+        self.number_in=tkinter.Button(window, text='0', width=50)
+        self.number_in.grid(row = 2, column = 1, pady = 2)
+
+        self.number_out=tkinter.Button(window, text='0', width=50)
+        self.number_out.grid(row = 3, column = 1, pady = 2)
 
         self.delay = 1
         self.update()
@@ -103,10 +106,13 @@ class App:
         self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.number.config(text=self.lic_in)
+        self.number_in.config(text=self.lic_in)
+        self.number_out.config(text='0')
 
         self.image_save = PIL.Image.fromarray(frame_2)
-        self.image_save.save("photo/"+uid+".png")
+        self.image_save.save("photo/"+uid+"_head.png")
+        self.image_save = PIL.Image.fromarray(frame_1)
+        self.image_save.save("photo/"+uid+"_tail.png")
         # file = open("lic/"+uid+".txt", 'w')
         # file.write(uid + '\n' + uid)
         # file.write(id_str[1][0] + '\n' + id_str[0][0])
@@ -130,11 +136,14 @@ class App:
         self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.number.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
+        self.number_in.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
+        self.number_out.config(text='0')
         
 
         self.image_save = PIL.Image.fromarray(frame_2)
-        self.image_save.save("photo/"+uid+".png")
+        self.image_save.save("photo/"+uid+"_head.png")
+        self.image_save = PIL.Image.fromarray(frame_1)
+        self.image_save.save("photo/"+uid+"_tail.png")
         # file = open("lic/"+uid+".txt", 'w')
         # file.write(uid + '\n' + uid)
         # file.write(id_str[1][0] + '_' + id_str[0][0])
@@ -152,13 +161,15 @@ class App:
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_out = str(id_str[1][0] + '_' + id_str[0][0])
 
-        self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
-        img_show2 = PIL.Image.open("photo/"+uid+".png")
+        img_show1 = PIL.Image.open("photo/"+uid+"_tail.png")
+        self.image_show1 = PIL.ImageTk.PhotoImage(image = img_show1)
+        img_show2 = PIL.Image.open("photo/"+uid+"_head.png")
         self.image_show2 = PIL.ImageTk.PhotoImage(image = img_show2)
 
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.number.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
+        self.number_in.config(text=lic_in)
+        self.number_out.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
 
         # file = open("lic/"+uid+".txt", 'r')
         # lic = file.read()
@@ -167,7 +178,8 @@ class App:
         if (self.lic_out == self.lic_in):
             print("match")
 
-            os.remove("photo/"+uid+".png") 
+            os.remove("photo/"+uid+"_head.png") 
+            os.remove("photo/"+uid+"_tail.png") 
             data.del_id(uid)
             #send massage to arduino
             cmd = "On"

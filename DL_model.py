@@ -7,6 +7,7 @@ from src.PaddleOCR.model.text_detector import PaddleTextDetector
 from src.utils import vconcat_2_images, check_valid_image, calculate_list_distance
 from src.preprocess.preprocess import screen_alignment, rotate_bbx#, rule_split_index
 from src.postprocess.postprocess import sorted_boxes
+from src.yolov7.utils.plots import save_one_box
 import numpy as np
 import itertools
 import pandas as pd
@@ -36,24 +37,43 @@ class license_id():
       output: str of id and confidence, image with bbox, crop image of plate license
       '''
       img=copy.deepcopy(image)
-      try:
-         crop,cordinate=self.plate_detetor.detect(img)
+      cordinate=self.plate_detetor.detect(img)
+      # crop = save_one_box(cordinate, img, BGR=True, save=False)
 
+      if cordinate is not None:
+         crop = save_one_box(cordinate, img, BGR=True, save=False)
          # Paddle Text Flow
          det = self.text_detector.detect(crop)
+         det_ = self.text_detector.detect(img)
 
          img_crop_list = []
-         for box in det:
-            img_crop = self.crop_image(crop, box)
-            img_crop_list.append(img_crop)
+         if det is not None and det_ is not None:      
+            for box in det:
+               img_crop = self.crop_image(crop, box)
+               img_crop_list.append(img_crop)
 
-         list_recognition = self.text_recognizer.detect(img_crop_list)
+            list_recognition = self.text_recognizer.detect(img_crop_list)
+         else:
+            list_recognition = ['0','0']
 
          bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
                                     (int(cordinate[2]),int(cordinate[3])),
                                     color=(0,255,0),thickness=3)
-      except TypeError:
-         list_recognition,bbox_image,crop=('0',img,img)
+      else:
+         # Paddle Text Flow
+         det = self.text_detector.detect(img)
+
+         img_crop_list = []
+         if det is None:
+            list_recognition = ['0','0']
+         else:
+            for box in det:
+               img_crop = self.crop_image(crop, box)
+               img_crop_list.append(img_crop)
+
+            list_recognition = self.text_recognizer.detect(img_crop_list)
+
+         bbox_image,crop=(img,img)
 
       return list_recognition,bbox_image,crop
    
