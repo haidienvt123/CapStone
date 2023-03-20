@@ -120,7 +120,7 @@ class App:
         
         #send massage to arduino
         cmd = "On"
-        print('on')
+        
         cmd = cmd + '\r'
         arduinoData.write(cmd.encode())
 
@@ -151,7 +151,6 @@ class App:
         
         #send massage to arduino
         cmd = "On"
-        print('on')
         cmd = cmd + '\r'
         arduinoData.write(cmd.encode())
 
@@ -183,7 +182,6 @@ class App:
             data.del_id(uid)
             #send massage to arduino
             cmd = "On"
-            print('on')
             cmd = cmd + '\r'
             arduinoData.write(cmd.encode())
         else:
