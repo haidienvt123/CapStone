@@ -4,17 +4,10 @@ import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
 import serial
-import os.path
 from test_mongo import database
 import platform
 from DL_model import license_id
-
-#read signal from port
-arduinoData = serial.Serial('/dev/ttyACM0',9600)
-time.delay = 1000
-license_plate=license_id()
-
-data=database()
+import os
 
 # video capture
 class MyvideoCapture:
@@ -49,40 +42,46 @@ class App:
         self.vid_1 = MyvideoCapture(video_source_1)    
         self.video_source_2 = video_source_2
         self.vid_2 = MyvideoCapture(video_source_2)  
+        self.solution = 'Match'
 
-        ret_1, frame_1 = self.vid_1.get_frame()
-        ret_2, frame_2 = self.vid_2.get_frame()
-        self.image_save = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_1))
-
-        self.abc = 0
-
+        # Top Left
         self.live1 = tkinter.Canvas(window, width = self.vid_1.width, height = self.vid_1.height*0.8)
         self.live1.grid(row = 0, column = 0, pady = 2)
 
+        # Top Right
         self.image1 = tkinter.Canvas(window, width = self.vid_1.width, height = self.vid_1.height*0.8)
         self.image1.grid(row = 0, column = 1, pady = 2)
 
+        # Bot Left
         self.live2 = tkinter.Canvas(window, width = self.vid_2.width, height = self.vid_2.height*0.8)
         self.live2.grid(row = 1, column = 0,pady = 2)
 
+        # Bot Right
         self.image2 = tkinter.Canvas(window, width = self.vid_2.width, height = self.vid_2.height*0.8)
         self.image2.grid(row = 1, column = 1, pady = 2)
 
-        self.btn_getvideo=tkinter.Button(window, text="takeImage", width=50, command=self.takeImageButton)
-        self.btn_getvideo.grid(row = 2, column = 0, pady = 2)
+        # Top Left Button - Open Door Button
+        self.button_takeImage=tkinter.Button(window, text="Open Door if Not Match", width=50, command=self.openDoor_notMatch)
+        self.button_takeImage.grid(row = 2, column = 0, pady = 2)
 
-        self.number_in=tkinter.Button(window, text='0', width=50)
-        self.number_in.grid(row = 2, column = 1, pady = 2)
+        # TOp Right Button - Match or not
+        self.button_solution=tkinter.Button(window, text=self.solution, width=50, background='green', activebackground='green')
+        self.button_solution.grid(row = 3, column = 0, pady = 2)
 
-        self.number_out=tkinter.Button(window, text='0', width=50)
-        self.number_out.grid(row = 3, column = 1, pady = 2)
+        # Top Right Button - Lic_in
+        self.button_number_in=tkinter.Button(window, text='Lic in: ', width=50)
+        self.button_number_in.grid(row = 2, column = 1, pady = 2)
+
+        # Bot Right Button - Lic_out
+        self.button_number_out=tkinter.Button(window, text='Lic out: ', width=50)
+        self.button_number_out.grid(row = 3, column = 1, pady = 2)
 
         self.delay = 1
         self.update()
 
         self.window.mainloop()
     
-    # update live frame_1
+    # update live1 and live2
     def update(self):
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
@@ -92,43 +91,57 @@ class App:
         if ret_2:
             self.photo_2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
             self.live2.create_image(0, 0, image = self.photo_2, anchor = tkinter.NW)
-        self.readUID()
+        self.readuid()
         self.window.after(self.delay, self.update)
     
     #take image and opendoor
-    def takeImage(self,uid):
+    def takeImage(self):
+        # get frame and detect
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_in = str(id_str[1][0] + '_' + id_str[0][0])
 
+        # show taken image and lic_in
         self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
         self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.number_in.config(text=self.lic_in)
-        self.number_out.config(text='0')
+        self.button_number_in.config(text="Lic in: "+self.lic_in)
+        self.button_number_out.config(text="Lic out: ")
 
+        # save image
         self.image_save = PIL.Image.fromarray(frame_2)
-        self.image_save.save("photo/"+uid+"_head.png")
+        self.image_save.save("photo/"+self.uid+"_head.png")
         self.image_save = PIL.Image.fromarray(frame_1)
-        self.image_save.save("photo/"+uid+"_tail.png")
-        # file = open("lic/"+uid+".txt", 'w')
-        # file.write(uid + '\n' + uid)
-        # file.write(id_str[1][0] + '\n' + id_str[0][0])
-        # file.close()
+        self.image_save.save("photo/"+self.uid+"_tail.png")
         
         #send massage to arduino
+        self.solution = 'Open Door'
+        self.button_solution.config(text=self.solution, background='green', activebackground='green')
         cmd = "On"
-        
         cmd = cmd + '\r'
         arduinoData.write(cmd.encode())
+    
+    def openDoor_notMatch(self):
+        if (self.solution == 'Not Match'):
+
+            self.solution = 'Open Door'
+            self.button_solution.config(text=self.solution, background='green', activebackground='green')
+            
+            # delete image and self.uid in database
+            os.remove("photo/"+self.uid+"_head.png") 
+            os.remove("photo/"+self.uid+"_tail.png") 
+            data.del_id(self.uid)
+            # send massage to arduino
+            cmd = "On"
+            cmd = cmd + '\r'
+            arduinoData.write(cmd.encode())
 
     def takeImageButton(self):
+        self.uid = '0'
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
-        uid = '0'
-
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_in = str(id_str[1][0] + '_' + id_str[0][0])
 
@@ -136,81 +149,80 @@ class App:
         self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.number_in.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
-        self.number_out.config(text='0')
+        self.button_number_in.config(text="Lic in: "+str(id_str[1][0] + '_' + id_str[0][0]))
+        self.button_number_out.config(text="Lic out: ")
         
 
         self.image_save = PIL.Image.fromarray(frame_2)
-        self.image_save.save("photo/"+uid+"_head.png")
+        self.image_save.save("photo/"+self.uid+"_head.png")
         self.image_save = PIL.Image.fromarray(frame_1)
-        self.image_save.save("photo/"+uid+"_tail.png")
-        # file = open("lic/"+uid+".txt", 'w')
-        # file.write(uid + '\n' + uid)
-        # file.write(id_str[1][0] + '_' + id_str[0][0])
-        # file.close()
+        self.image_save.save("photo/"+self.uid+"_tail.png")
         
         #send massage to arduino
         cmd = "On"
         cmd = cmd + '\r'
         arduinoData.write(cmd.encode())
 
-    def showImage(self,uid,lic_in):
+    def showImage(self,lic_in):
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_out = str(id_str[1][0] + '_' + id_str[0][0])
 
-        img_show1 = PIL.Image.open("photo/"+uid+"_tail.png")
+        img_show1 = PIL.Image.open("photo/"+self.uid+"_tail.png")
         self.image_show1 = PIL.ImageTk.PhotoImage(image = img_show1)
-        img_show2 = PIL.Image.open("photo/"+uid+"_head.png")
+        img_show2 = PIL.Image.open("photo/"+self.uid+"_head.png")
         self.image_show2 = PIL.ImageTk.PhotoImage(image = img_show2)
 
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.number_in.config(text=lic_in)
-        self.number_out.config(text=str(id_str[1][0] + '_' + id_str[0][0]))
+        self.button_number_in.config(text="Lic in: "+lic_in)
+        self.button_number_out.config(text="Lic out: "+str(id_str[1][0] + '_' + id_str[0][0]))
 
-        # file = open("lic/"+uid+".txt", 'r')
-        # lic = file.read()
-        # lic_in = str(uid + '\n' + uid)
         self.lic_in = lic_in
         if (self.lic_out == self.lic_in):
-            print("match")
+            self.solution = 'Match'
+            self.button_solution.config(text=self.solution, background='green', activebackground='green')
 
-            os.remove("photo/"+uid+"_head.png") 
-            os.remove("photo/"+uid+"_tail.png") 
-            data.del_id(uid)
-            #send massage to arduino
+            # delete image and self.uid in database
+            os.remove("photo/"+self.uid+"_head.png") 
+            os.remove("photo/"+self.uid+"_tail.png") 
+            data.del_id(self.uid)
+            # send massage to arduino
             cmd = "On"
             cmd = cmd + '\r'
             arduinoData.write(cmd.encode())
         else:
-            print("not match")
+            self.solution = 'Not Match'
+            self.button_solution.config(text=self.solution, background='red', activebackground='red')
 
 
-    #Read UID card, show on bar and take iamge
-    def readUID(self):
+    #Read self.uid card, show on bar and take iamge
+    def readuid(self):
         #show id card 
         if (arduinoData.inWaiting()!=0):
             dataPacket = arduinoData.readline()
             dataPacket = str(dataPacket,'utf-8')
-            uid = dataPacket.strip('\r\n')
-            os.path.isfile("photo/"+uid+".png")
+            self.uid = dataPacket.strip('\r\n')
+            # os.path.isfile("photo/"+self.uid+".png")
 
             # database in/out
-            if (data.check_id(uid) == None):
-                self.takeImage(uid)
-                data.add_id(uid,self.lic_in,"red")
+            if (data.check_id(self.uid) == None):
+                self.takeImage()
+                data.add_id(self.uid,self.lic_in,"red")
             else:
-                data_out = data.get_id(uid)
-                self.showImage(uid,data_out["lic"])
+                data_out = data.get_id(self.uid)
+                self.showImage(data_out["lic"])
                 
-
-            # if os.path.isfile("/home/red/cap/CapStone/photo/"+uid+".png"):
-            #     self.showImage(uid)
-            # else:
-            #     self.takeImage(uid)
 if platform.system() == "Linux":
+    arduinoData = serial.Serial('/dev/ttyACM0',9600)
+    time.delay = 1000
+    license_plate=license_id()
+    data=database()
     App(tkinter.Tk(), "get_video",'/dev/video0','/dev/video2',30)
 else:
+    arduinoData = serial.Serial('COM8',9600)
+    time.delay = 1000
+    license_plate=license_id()
+    data=database()
     App(tkinter.Tk(), "get_video",0,1,30)
