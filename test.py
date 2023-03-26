@@ -86,11 +86,11 @@ class App:
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
         if ret_1:
-            self.photo_1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_1))
-            self.live1.create_image(0, 0, image = self.photo_1, anchor = tkinter.NW)
+            self.image_1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_1))
+            self.live1.create_image(0, 0, image = self.image_1, anchor = tkinter.NW)
         if ret_2:
-            self.photo_2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
-            self.live2.create_image(0, 0, image = self.photo_2, anchor = tkinter.NW)
+            self.image_2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
+            self.live2.create_image(0, 0, image = self.image_2, anchor = tkinter.NW)
         self.readuid()
         self.window.after(self.delay, self.update)
     
@@ -111,10 +111,8 @@ class App:
         self.button_number_out.config(text="Lic out: ")
 
         # save image
-        self.image_save = PIL.Image.fromarray(frame_2)
-        self.image_save.save("photo/"+self.uid+"_head.png")
-        self.image_save = PIL.Image.fromarray(frame_1)
-        self.image_save.save("photo/"+self.uid+"_tail.png")
+        self.image_in1 = PIL.Image.fromarray(frame_1)
+        self.image_in2 = PIL.Image.fromarray(frame_2)
         
         #send massage to arduino
         self.solution = 'Open Door'
@@ -128,10 +126,7 @@ class App:
 
             self.solution = 'Open Door'
             self.button_solution.config(text=self.solution, background='green', activebackground='green')
-            
-            # delete image and self.uid in database
-            os.remove("photo/"+self.uid+"_head.png") 
-            os.remove("photo/"+self.uid+"_tail.png") 
+
             data.del_id(self.uid)
             # send massage to arduino
             cmd = "On"
@@ -152,41 +147,29 @@ class App:
         self.button_number_in.config(text="Lic in: "+str(id_str[1][0] + '_' + id_str[0][0]))
         self.button_number_out.config(text="Lic out: ")
         
-
-        self.image_save = PIL.Image.fromarray(frame_2)
-        self.image_save.save("photo/"+self.uid+"_head.png")
-        self.image_save = PIL.Image.fromarray(frame_1)
-        self.image_save.save("photo/"+self.uid+"_tail.png")
-        
         #send massage to arduino
         cmd = "On"
         cmd = cmd + '\r'
         arduinoData.write(cmd.encode())
 
-    def showImage(self,lic_in):
+    def showImage(self):
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_out = str(id_str[1][0] + '_' + id_str[0][0])
 
-        img_show1 = PIL.Image.open("photo/"+self.uid+"_tail.png")
-        self.image_show1 = PIL.ImageTk.PhotoImage(image = img_show1)
-        img_show2 = PIL.Image.open("photo/"+self.uid+"_head.png")
-        self.image_show2 = PIL.ImageTk.PhotoImage(image = img_show2)
+        self.image_show1 = PIL.ImageTk.PhotoImage(image = self.image_show1)
+        self.image_show2 = PIL.ImageTk.PhotoImage(image = self.image_show2)
 
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.button_number_in.config(text="Lic in: "+lic_in)
+        self.button_number_in.config(text="Lic in: "+self.lic_in)
         self.button_number_out.config(text="Lic out: "+str(id_str[1][0] + '_' + id_str[0][0]))
 
-        self.lic_in = lic_in
         if (self.lic_out == self.lic_in):
             self.solution = 'Match'
             self.button_solution.config(text=self.solution, background='green', activebackground='green')
 
-            # delete image and self.uid in database
-            os.remove("photo/"+self.uid+"_head.png") 
-            os.remove("photo/"+self.uid+"_tail.png") 
             data.del_id(self.uid)
             # send massage to arduino
             cmd = "On"
@@ -197,7 +180,7 @@ class App:
             self.button_solution.config(text=self.solution, background='red', activebackground='red')
 
 
-    #Read self.uid card, show on bar and take iamge
+    #Read self.uid card, show on bar and take image
     def readuid(self):
         #show id card 
         if (arduinoData.inWaiting()!=0):
@@ -209,10 +192,10 @@ class App:
             # database in/out
             if (data.check_id(self.uid) == None):
                 self.takeImage()
-                data.add_id(self.uid,self.lic_in,"red")
+                data.add_id(self.uid,self.lic_in,"red",self.image_in1,self.image_in2)
             else:
-                data_out = data.get_id(self.uid)
-                self.showImage(data_out["lic"])
+                self.lic_in,self.color,self.image_show1,self.image_show2 = data.get_id(self.uid)
+                self.showImage()
                 
 if platform.system() == "Linux":
     arduinoData = serial.Serial('/dev/ttyACM0',9600)
