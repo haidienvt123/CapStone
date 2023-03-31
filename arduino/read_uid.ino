@@ -99,7 +99,6 @@ void loop() {
       nuidPICC[i] = rfid.uid.uidByte[i];
     }
     printHex(rfid.uid.uidByte, rfid.uid.size);
-    opendoor();
   }
 
   // Halt PICC
