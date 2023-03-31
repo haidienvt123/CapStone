@@ -4,7 +4,7 @@ import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
 import serial
-from test_mongo import database
+from mongo import database
 import platform
 from DL_model import license_id
 import os
