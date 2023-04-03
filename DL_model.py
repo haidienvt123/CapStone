@@ -53,6 +53,9 @@ class license_id():
                img_crop_list.append(img_crop)
 
             list_recognition = self.text_recognizer.detect(img_crop_list)
+            if len(list_recognition)<2:
+               temp=list_recognition[0][0].split('-')
+               list_recognition=[(str(temp[1]),1),(str(temp[0]),1)] #testing
          else:
             list_recognition = ['0','0']
 
@@ -68,7 +71,7 @@ class license_id():
             list_recognition = ['0','0']
          else:
             for box in det:
-               img_crop = self.crop_image(crop, box)
+               img_crop = self.crop_image(img, box)
                img_crop_list.append(img_crop)
 
             list_recognition = self.text_recognizer.detect(img_crop_list)
