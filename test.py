@@ -4,12 +4,13 @@ import time
 import PIL.Image, PIL.ImageTk
 import tkinter.messagebox
 import serial
-from DL_model import license_id
+from DL_model import license_id,car_detector
 
 #read signal from port
 # arduinoData = serial.Serial('COM8',9600)
 # time.delay = 1000
 license_plate=license_id()
+car=car_detector()
 
 # video capture
 class MyVideoCapture:
@@ -94,6 +95,7 @@ class App:
         ret, frame = self.vid.get_frame()
 
         id_str,bbox_image,crop_image=license_plate.license_detect(frame)
+        car_bbox_image,car_crop_image=car.car_detect(frame)
 
         self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
         self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))

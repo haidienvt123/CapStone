@@ -53,6 +53,9 @@ class license_id():
                img_crop_list.append(img_crop)
 
             list_recognition = self.text_recognizer.detect(img_crop_list)
+            if len(list_recognition)<2:
+               temp=list_recognition[0][0].split('-')
+               list_recognition=[(str(temp[1]),1),(str(temp[0]),1)] #testing
          else:
             list_recognition = ['0','0']
 
@@ -68,7 +71,7 @@ class license_id():
             list_recognition = ['0','0']
          else:
             for box in det:
-               img_crop = self.crop_image(crop, box)
+               img_crop = self.crop_image(img, box)
                img_crop_list.append(img_crop)
 
             list_recognition = self.text_recognizer.detect(img_crop_list)
@@ -76,4 +79,39 @@ class license_id():
          bbox_image,crop=(img,img)
 
       return list_recognition,bbox_image,crop
+   
+class car_detector():
+   def __init__(self) -> None:
+      #Initialize DL model
+      self.car_detector = CarDetector.getInstance()
+
+   def crop_image(self,img,box):
+      x=[]
+      y=[]
+      for i in box:
+         x.append(int(i[0]))
+         y.append(int(i[1]))
+      crop_img=img[min(y):max(y),min(x):max(x),:]
+      return crop_img
+   
+   def car_detect(self,image):
+      '''
+      get the car only image from camera shot
+      input: numpy ndarray
+      output: image with bbox, crop image of car
+      '''
+      img=copy.deepcopy(image)
+      cordinate=self.car_detector.detect(img)
+      # crop = save_one_box(cordinate, img, BGR=True, save=False)
+
+      if cordinate is not None:
+         crop = save_one_box(cordinate, img, BGR=True, save=False)
+
+         bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
+                                    (int(cordinate[2]),int(cordinate[3])),
+                                    color=(0,255,0),thickness=3)
+      else:
+         bbox_image,crop=(img,img)
+
+      return bbox_image,crop
    
