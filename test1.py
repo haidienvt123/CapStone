@@ -62,20 +62,23 @@ class App:
     
     #take image and opendoor
     def det_col(self):
-        self.color = take_color(self.cv_img)
+        img = cv2.cvtColor(self.cv_img,cv2.COLOR_BGR2RGB)
+        self.color = take_color(img)
         self.show_color.config(text= self.color)
 
     def det_img(self):
         id_str,bbox_image,crop_image=license_plate.license_detect(self.cv_img)
         bbox_image_show = cv2.cvtColor(bbox_image,cv2.COLOR_BGR2RGB)
-        self.image_show1 = ImageTk.PhotoImage(image = Image.fromarray(bbox_image_show))
+        image = Image.fromarray(bbox_image_show)
+        image=image.resize((600, 400))
+        self.image_show1 = ImageTk.PhotoImage(image)
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
-        self.number.config(text=str(id_str[0][0]))
+        self.number.config(text=str(id_str[1][0]+'_'+id_str[0][0]))
 
     #Read UID card, show on bar and take iamge
     def upload_file(self):
         f_types = [('Jpg Files', '*.jpg')]
-        filename = filedialog.askopenfilename(filetypes=f_types)
+        filename = filedialog.askopenfilename()
         self.image=Image.open(filename)
         self.image=self.image.resize((600, 400))
         self.cv_img = cv2.imread(filename)
