@@ -119,7 +119,7 @@ class car_detector():
    
 class color_detector():
    def __init__(self) -> None:
-      self.model = keras.models.load_model('vehicle_color_haze_free_model.h5')
+      self.model = keras.models.load_model('model/color_detector/vehicle_color_haze_free_model.h5')
       self.d_b={0: 'black',1:'blue',2:'cyan',3:'gray',4:'green',5:'red',6:'white',7:'yellow'}
       
    def take_color(self,img):
