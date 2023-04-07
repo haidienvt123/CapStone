@@ -37,6 +37,7 @@ def post_data(data: id_lic):
     # add_data = []
     # add_data.append(data)
     # print(add_data)
+    col.insert_one(data.dict())
     return data
 
 @app.delete("/delete_data")
