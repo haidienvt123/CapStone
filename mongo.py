@@ -17,14 +17,17 @@ class database:
     return query
     
 
-  def add_id(self,id_card,lic,color,image1,image2):
+  def add_id(self,id_card,lic,color,image1,image2,image_crop):
     image_bytes_1 = io.BytesIO()
     image1.save(image_bytes_1, format='JPEG')
     img1 = base64.b64encode(image_bytes_1.getvalue()).decode()
     image_bytes_2 = io.BytesIO()
     image2.save(image_bytes_2, format='JPEG')
     img2 = base64.b64encode(image_bytes_2.getvalue()).decode()
-    query = { "id_card": str(id_card), "lic": str(lic), "color": color, "image1": img1, "image2": img2}
+    image_bytes_crop = io.BytesIO()
+    image_bytes_crop.save(image_bytes_crop, format='JPEG')
+    img_crop = base64.b64encode(image_bytes_crop.getvalue()).decode()
+    query = { "id_card": str(id_card), "lic": str(lic), "color": color, "image1": img1, "image2": img2, "image_crop": img_crop}
     self.col.insert_one(query)
 
   def get_id(self,id_card):
@@ -38,7 +41,10 @@ class database:
     image2_str = base64.b64decode(query['image2'])
     img2 = io.BytesIO(image2_str)
     image2 = Image.open(img2)
-    return lic,color,image1,image2
+    image_crop_str = base64.b64decode(query['image_crop'])
+    img_crop = io.BytesIO(image_crop_str)
+    image_crop = Image.open(img_crop)
+    return lic,color,image1,image2,image_crop
 
   def del_id(self,id_card):
     id = { "id_card": str(id_card)}

@@ -3,23 +3,12 @@ from tkinter import filedialog
 from tkinter.filedialog import askopenfile
 from PIL import Image, ImageTk
 import numpy as np
-from tensorflow import keras
 import cv2
-from DL_model import license_id
-
-model = keras.models.load_model('vehicle_color_haze_free_model.h5')
-d={'black':0,'blue':1,'cyan':2,'gray':3,'green':4,'red':5,'white':6,'yellow':7}
-d_b={0: 'black',1:'blue',2:'cyan',3:'gray',4:'green',5:'red',6:'white',7:'yellow'}
+from DL_model import license_id,color_detector
 
 license_plate=license_id()
+color = color_detector()
 
-def take_color(img):
-    dim = (100,100)
-    resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-    df = resized.astype('float32')
-    df=df/255
-    activations = model.predict(df.reshape(1,100,100,3))
-    return d_b[np.argmax(activations[len(activations)-1])]
 
 class App:
     def __init__(self, window):
@@ -63,7 +52,7 @@ class App:
     #take image and opendoor
     def det_col(self):
         img = cv2.cvtColor(self.cv_img,cv2.COLOR_BGR2RGB)
-        self.color = take_color(img)
+        self.color = color.take_color(img)
         self.show_color.config(text= self.color)
 
     def det_img(self):

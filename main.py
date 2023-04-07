@@ -6,7 +6,7 @@ import tkinter.messagebox
 import serial
 from mongo import database
 import platform
-from DL_model import license_id
+from DL_model import license_id,car_detector,color_detector
 import os
 
 # video capture
@@ -99,12 +99,16 @@ class App:
         # get frame and detect
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
+        
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_in = str(id_str[1][0] + '_' + id_str[0][0])
+        
+        car_bbox_image,car_crop_image=car.car_detect(frame_2)
+        self.color_in = color.take_color(car_crop_image)
 
         # show taken image and lic_in
         self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
-        self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
+        self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(car_bbox_image))
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
         self.button_number_in.config(text="Lic in: "+self.lic_in)
@@ -113,6 +117,7 @@ class App:
         # save image
         self.image_in1 = PIL.Image.fromarray(frame_1)
         self.image_in2 = PIL.Image.fromarray(frame_2)
+        self.car_crop_image_in = PIL.Image.fromarray(car_crop_image)
         
         #send massage to arduino
         self.solution = 'Open Door'
@@ -133,31 +138,16 @@ class App:
             cmd = cmd + '\r'
             arduinoData.write(cmd.encode())
 
-    def takeImageButton(self):
-        self.uid = '0'
-        ret_1, frame_1 = self.vid_1.get_frame()
-        ret_2, frame_2 = self.vid_2.get_frame()
-        id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
-        self.lic_in = str(id_str[1][0] + '_' + id_str[0][0])
-
-        self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
-        self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame_2))
-        self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
-        self.image2.create_image(0, 0, image = self.image_show2, anchor = tkinter.NW)
-        self.button_number_in.config(text="Lic in: "+str(id_str[1][0] + '_' + id_str[0][0]))
-        self.button_number_out.config(text="Lic out: ")
-        
-        #send massage to arduino
-        cmd = "On"
-        cmd = cmd + '\r'
-        arduinoData.write(cmd.encode())
-
     def showImage(self):
         ret_1, frame_1 = self.vid_1.get_frame()
         ret_2, frame_2 = self.vid_2.get_frame()
+        
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
         self.lic_out = str(id_str[1][0] + '_' + id_str[0][0])
-
+        
+        car_bbox_image,car_crop_image=car.car_detect(frame_2)
+        self.color_out = color.take_color(car_crop_image)
+        
         self.image_show1 = PIL.ImageTk.PhotoImage(image = self.image_show1)
         self.image_show2 = PIL.ImageTk.PhotoImage(image = self.image_show2)
 
@@ -192,20 +182,24 @@ class App:
             # database in/out
             if (data.check_id(self.uid) == None):
                 self.takeImage()
-                data.add_id(self.uid,self.lic_in,"red",self.image_in1,self.image_in2)
+                data.add_id(self.uid,self.lic_in,self.color_in,self.image_in1,self.image_in2,self.car_crop_image_in)
             else:
-                self.lic_in,self.color,self.image_show1,self.image_show2 = data.get_id(self.uid)
+                self.lic_in,self.color_in,self.image_show1,self.image_show2,self.car_crop_image_in = data.get_id(self.uid)
                 self.showImage()
                 
 if platform.system() == "Linux":
     arduinoData = serial.Serial('/dev/ttyACM0',9600)
     time.delay = 1000
     license_plate=license_id()
+    car=car_detector()
+    color = color_detector()
     data=database()
     App(tkinter.Tk(), "get_video",'/dev/video0','/dev/video2',30)
 else:
     arduinoData = serial.Serial('COM8',9600)
     time.delay = 1000
     license_plate=license_id()
+    car=car_detector()
+    color = color_detector()
     data=database()
     App(tkinter.Tk(), "get_video",0,1,30)

@@ -12,6 +12,7 @@ import numpy as np
 import itertools
 import pandas as pd
 import copy
+from tensorflow import keras
 
 class license_id():
    def __init__(self) -> None:
@@ -114,4 +115,17 @@ class car_detector():
          bbox_image,crop=(img,img)
 
       return bbox_image,crop
+   
+class color_detector():
+   def __init__(self) -> None:
+      self.model = keras.models.load_model('vehicle_color_haze_free_model.h5')
+      self.d_b={0: 'black',1:'blue',2:'cyan',3:'gray',4:'green',5:'red',6:'white',7:'yellow'}
+      
+   def take_color(self,img):
+      dim = (100,100)
+      resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+      df = resized.astype('float32')
+      df=df/255
+      activations = self.model.predict(df.reshape(1,100,100,3))
+      return self.d_b[np.argmax(activations[len(activations)-1])]
    
