@@ -1,5 +1,6 @@
 import cv2 
 from src.yolov7.plate_detector import PlateDetector
+from src.yolov7.car_detector import CarDetector
 from src.yolov7.text_detector import TextDetector
 from src.PaddleOCR.model.text_angle_classifier import PaddleTextAngleClassifier
 from src.PaddleOCR.model.text_recognizer import PaddleTextRecognizer
