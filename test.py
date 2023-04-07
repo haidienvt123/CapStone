@@ -96,6 +96,8 @@ class App:
 
         id_str,bbox_image,crop_image=license_plate.license_detect(frame)
         car_bbox_image,car_crop_image=car.car_detect(frame)
+        if car_bbox_image is None:
+            car_bbox_image,car_crop_image=frame,frame
 
         self.image_show1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(bbox_image))
         self.image_show2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
