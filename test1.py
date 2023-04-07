@@ -4,11 +4,11 @@ from tkinter.filedialog import askopenfile
 from PIL import Image, ImageTk
 import numpy as np
 import cv2
-from DL_model import license_id,color_detector
+from DL_model import license_id,color_detector,car_detector
 
 license_plate=license_id()
 color = color_detector()
-
+car = car_detector()
 
 class App:
     def __init__(self, window):
@@ -45,13 +45,25 @@ class App:
         self.number=tkinter.Button(window, text='0', width=50)
         self.number.grid(row = 3, column = 1, pady = 2)
         #self.number.pack(anchor=tkinter.CENTER, expand=True)
+        
+        self.btn_car=tkinter.Button(window, text="Detect Car", width=50, command = self.det_car)
+        self.btn_car.grid(row = 4, column = 0, pady = 2)
+        #self.btn_getvideo.pack(anchor=tkinter.CENTER, expand=True)
 
         self.window.mainloop()
 
+    def det_car(self):
+        car_bbox_image,car_crop_image=car.car_detect(self.cv_img)
+        bbox_image_show = cv2.cvtColor(car_bbox_image,cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(bbox_image_show)
+        image=image.resize((600, 400))
+        self.image_show1 = ImageTk.PhotoImage(image)
+        self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
     
     #take image and opendoor
     def det_col(self):
-        img = cv2.cvtColor(self.cv_img,cv2.COLOR_BGR2RGB)
+        car_bbox_image,car_crop_image=car.car_detect(self.cv_img)
+        img = cv2.cvtColor(car_crop_image,cv2.COLOR_BGR2RGB)
         self.color = color.take_color(img)
         self.show_color.config(text= self.color)
 
