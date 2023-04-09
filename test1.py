@@ -69,6 +69,7 @@ class App:
 
     def det_img(self):
         id_str,bbox_image,crop_image=license_plate.license_detect(self.cv_img)
+        cv2.imwrite('lic.jpg', crop_image)
         bbox_image_show = cv2.cvtColor(bbox_image,cv2.COLOR_BGR2RGB)
         image = Image.fromarray(bbox_image_show)
         image=image.resize((600, 400))
@@ -79,7 +80,7 @@ class App:
     #Read UID card, show on bar and take iamge
     def upload_file(self):
         f_types = [('Jpg Files', '*.jpg')]
-        filename = filedialog.askopenfilename()
+        filename = filedialog.askopenfilename(filetypes=f_types)
         self.image=Image.open(filename)
         self.image=self.image.resize((600, 400))
         self.cv_img = cv2.imread(filename)

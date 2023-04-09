@@ -17,5 +17,5 @@ url_get = 'http://127.0.0.1:8000/get_id'
 
 # x = requests.post(url_post, json=query)
 
-x = requests.delete(url_del, params = {'id_card': 1})
+# x = requests.delete(url_del, params = {'id_card': 1})
 print(x.text)
