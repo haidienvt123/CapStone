@@ -49,7 +49,7 @@ class license_id():
          det_ = self.text_detector.detect(img)
 
          img_crop_list = []
-         if det is not None and det_ is not None:      
+         if det is not None or det_ is not None:
             for box in det:
                img_crop = self.crop_image(crop, box)
                img_crop_list.append(img_crop)
@@ -61,7 +61,8 @@ class license_id():
          else:
             list_recognition = ['0','0']
 
-         bbox_image=cv2.rectangle(img,(int(cordinate[0]),int(cordinate[1])),
+         bbox_image=copy.deepcopy(img)
+         cv2.rectangle(bbox_image,(int(cordinate[0]),int(cordinate[1])),
                                     (int(cordinate[2]),int(cordinate[3])),
                                     color=(0,255,0),thickness=3)
       else:
