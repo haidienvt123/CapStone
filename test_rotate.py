@@ -1,7 +1,6 @@
 import cv2
 
 def label(ba,i,j):
-  print(i,j)
   if (i == a) or (i<-a) or (j==b) or (j<-b):
     return None
   if ba[i][j] == 0:
@@ -36,7 +35,7 @@ for i in contours:
 foreground = binary[min_y:max_y, min_x:max_x]
 a,b = foreground.shape
 label(foreground,0,0)
-ret,bin = cv2.threshold(binary,150,255,cv2.THRESH_BINARY_INV)
+ret,bin = cv2.threshold(foreground,150,255,cv2.THRESH_BINARY_INV)
 contours,hierarchy = cv2.findContours(bin,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 min_x = 1000
 min_y = 1000
