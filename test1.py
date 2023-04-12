@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 import numpy as np
 import cv2
 from DL_model import license_id,color_detector,car_detector
+from test_rotate import crop_num
 
 license_plate=license_id()
 color = color_detector()
@@ -70,9 +71,10 @@ class App:
     def det_img(self):
         id_str,bbox_image,crop_image=license_plate.license_detect(self.cv_img)
         cv2.imwrite('lic.jpg', crop_image)
+        crop_number = crop_num(crop_image)
         bbox_image_show = cv2.cvtColor(bbox_image,cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(bbox_image_show)
-        image=image.resize((600, 400))
+        image = Image.fromarray(crop_number)
+        image=image.resize((400, 80))
         self.image_show1 = ImageTk.PhotoImage(image)
         self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
         self.number.config(text=str(id_str[1][0]+'_'+id_str[0][0]))
