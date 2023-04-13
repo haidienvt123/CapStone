@@ -19,41 +19,38 @@ def label(ba,i,j):
         # label(ba,i-1,j+1)
         # label(ba,i-1,j-1) 
     
-def label_xy(ba,i,j,a,b,x_min,x_max,y_min,y_max):
+def label_xy(ba,i,j,a,b,list_x,list_y):
     if (i == a) or (i<-a) or (j==b) or (j<-b):
         return None
     if ba[i][j] == 0:
         ba[i][j] = 255
-        _,_,_,_ = label_xy(ba,i-1,j,a,b,x_min,x_max,y_min,y_max)
-        _,_,_,_ = label_xy(ba,i,j+1,a,b,x_min,x_max,y_min,y_max)
-        _,_,_,_ = label_xy(ba,i,j-1,a,b,x_min,x_max,y_min,y_max)
-        _,_,_,_ = label_xy(ba,i+1,j,a,b,x_min,x_max,y_min,y_max)
-        if j < x_min:
-            x_min = j
-        if i < y_min:
-            y_min = i
-        if j > x_max:
-            x_max = j
-        if i > y_max:
-            y_max = i
-    return x_min,x_max,y_min,y_max
+        list_x.append(i)
+        list_y.append(j)
+        label_xy(ba,i-1,j,a,b,list_x,list_y)
+        label_xy(ba,i,j+1,a,b,list_x,list_y)
+        label_xy(ba,i,j-1,a,b,list_x,list_y)
+        label_xy(ba,i+1,j,a,b,list_x,list_y)
+
 
 def crop(bina):
     t=0
+    list = []
     a,b = bina.shape
     bina_copy = bina.copy()
     for j in range(b):
         for i in range(a):
-            if bina[i][j] == 0:
-                x_min = 1000
-                y_min = 1000
-                x_max = 0
-                y_max = 0
-                x_min,x_max,y_min,y_max = label_xy(bina_copy,i,j,a,b,x_min,x_max,y_min,y_max)
-                # print(x_min,x_max,y_min,y_max)
-                t+=1
-    print(t)
-    return 0
+            if bina_copy[i][j] == 0:
+                list_x=[]
+                list_y=[]
+                label_xy(bina_copy,i,j,a,b,list_x,list_y)
+                x_max = max(list_x)
+                x_min = min(list_x)
+                y_max = max(list_y)
+                y_min = min(list_y)
+                # list.append([x_min,x_max,y_min,y_max])
+                crop_img = bina[x_min:x_max+1, y_min:y_max+1]
+                list.append(crop_img)
+    return list
 
 def change_color(bina):
     a,b = bina.shape
@@ -71,15 +68,29 @@ def crop_num(image):
     cv2.imwrite("bw_0.png",binary)
     bina = change_color(binary)
     cv2.imwrite("bw_1.png",bina)
-    # min_h = 10
-    # min_w = 7
-    # d=0
-    # num = crop(bina)
-    # for i in bina:
-    #     for j in i:
-    #         if j == 255:
-    #             d+=1
-    return bina
+    min_h = 10
+    min_w = 6
+    list = crop(bina)
+    # dùng để cắt từng chữ nhưng không theo thứ tự và không lấy được thứ tự
+    # # ret,binary = cv2.threshold(bina,100,255,cv2.THRESH_BINARY_INV)
+    # # contours, hierarchy = cv2.findContours(binary, 
+    # # cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # # mask = np.zeros_like(binary) # Create mask where white is what we want, black otherwise
+    # # cv2.drawContours(mask, contours, 3, 255, -1) # Draw filled contour in mask
+    # # out = np.zeros_like(binary) # Extract out the object and place into output image
+    # # out[mask == 255] = binary[mask == 255]
+    
+    # # (y, x) = np.where(mask == 255)
+    # # (topy, topx) = (np.min(y), np.min(x))
+    # # (bottomy, bottomx) = (np.max(y), np.max(x))
+    # # out = out[topy:bottomy+1, topx:bottomx+1]
+    return list
 
-# img = cv2.imread('lic.jpg')
-# crop_num(img)
+img = cv2.imread('lic.jpg')
+list_crop = crop_num(img)
+print(list_crop[0].shape)
+cv2.imwrite("bw_2.png",list_crop[0])
+
+# img = cv2.imread('bw_1.jpg')
+# img_crop = img[list_crop[0][0]:list_crop[0][1],list_crop[0][2]:list_crop[0][3]]
+# cv2.imwrite("bw_3.png",img_crop)
