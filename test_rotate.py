@@ -66,7 +66,7 @@ def change_color(bina):
 
 def crop_num(image):
     gray =cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    ret,binary = cv2.threshold(gray,100,255,cv2.THRESH_BINARY)
+    ret,binary = cv2.threshold(gray,120,255,cv2.THRESH_BINARY)
     cv2.imwrite("bw_0.png",binary)
     bina = change_color(binary)
     cv2.imwrite("bw_1.png",bina)
@@ -88,12 +88,10 @@ def crop_num(image):
     # # out = out[topy:bottomy+1, topx:bottomx+1]
     return list
 
-from DL_model import license_id
-license_plate=license_id()
 img = cv2.imread('lic.jpg')
 list_crop = crop_num(img)
 for i in range(8):
-    cv2.imwrite("bw_2_"+str(i)+".png",list_crop[i])
+    cv2.imwrite("bw_3_"+str(i)+".png",list_crop[i])
 
 # img = cv2.imread('bw_1.jpg')
 # img_crop = img[list_crop[0][0]:list_crop[0][1],list_crop[0][2]:list_crop[0][3]]
