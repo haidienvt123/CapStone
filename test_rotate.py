@@ -48,8 +48,10 @@ def crop(bina):
                 y_max = max(list_y)
                 y_min = min(list_y)
                 # list.append([x_min,x_max,y_min,y_max])
-                crop_img = bina[x_min:x_max+1, y_min:y_max+1]
-                list.append(crop_img)
+                crop_img = bina[x_min-1:x_max+2, y_min-1:y_max+2]
+                h,w = crop_img.shape
+                if (12<h<18) and (3<w<11):
+                    list.append(crop_img)
     return list
 
 def change_color(bina):
@@ -86,10 +88,12 @@ def crop_num(image):
     # # out = out[topy:bottomy+1, topx:bottomx+1]
     return list
 
+from DL_model import license_id
+license_plate=license_id()
 img = cv2.imread('lic.jpg')
 list_crop = crop_num(img)
-print(list_crop[0].shape)
-cv2.imwrite("bw_2.png",list_crop[0])
+for i in range(8):
+    cv2.imwrite("bw_2_"+str(i)+".png",list_crop[i])
 
 # img = cv2.imread('bw_1.jpg')
 # img_crop = img[list_crop[0][0]:list_crop[0][1],list_crop[0][2]:list_crop[0][3]]
