@@ -66,6 +66,7 @@ def change_color(bina):
 
 def crop_num(image):
     gray =cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite("bw_-1.png",gray)
     ret,binary = cv2.threshold(gray,120,255,cv2.THRESH_BINARY)
     cv2.imwrite("bw_0.png",binary)
     bina = change_color(binary)
@@ -75,26 +76,28 @@ def crop_num(image):
     list = crop(bina)
 
     return list
+def nb(list_crop):
+    list_nb =[]
+    num = 0
+    for i in list_crop:
+        cv2.imwrite("bw_3_"+str(num)+".png",i)
+        blur = cv2.blur(i,(3,3))
+        cv2.imwrite("bw_4_"+str(num)+".png",blur)
+        for j in range(len(i)):
+            for k in range(len(i[j])):
+                if j == 0 or k == 0 or j == len(i)-1 or k == len(i[j]) - 1:
+                    continue
+                if blur[j][k] <= 125 and (i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1] == 255):
+                # if ((i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1]) == 255):
+                    i[j][k] = 0
+        cv2.imwrite("bw_5_"+str(num)+".png",i)
+        list_nb.append(i)
+        num += 1
+    return list_nb
 
 img = cv2.imread('lic.jpg')
 list_crop = crop_num(img)
 
-list_nb =[]
-num = 0
-for i in list_crop:
-    cv2.imwrite("bw_3_"+str(num)+".png",i)
-    blur = cv2.blur(i,(3,3))
-    cv2.imwrite("bw_4_"+str(num)+".png",blur)
-    for j in range(len(i)):
-        for k in range(len(i[j])):
-            if j == 0 or k == 0 or j == len(i)-1 or k == len(i[j]) - 1:
-                continue
-            if blur[j][k] <= 125 and (i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1] == 255):
-            # if ((i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1]) == 255):
-                i[j][k] = 0
-    cv2.imwrite("bw_5_"+str(num)+".png",i)
-    list_nb.append(i)
-    num += 1
 
 # list_nb = sum(list_nb , list_crop)
 # print(len(list_nb))
