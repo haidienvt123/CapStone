@@ -73,26 +73,31 @@ def crop_num(image):
     min_h = 10
     min_w = 6
     list = crop(bina)
-    # dùng để cắt từng chữ nhưng không theo thứ tự và không lấy được thứ tự
-    # # ret,binary = cv2.threshold(bina,100,255,cv2.THRESH_BINARY_INV)
-    # # contours, hierarchy = cv2.findContours(binary, 
-    # # cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # # mask = np.zeros_like(binary) # Create mask where white is what we want, black otherwise
-    # # cv2.drawContours(mask, contours, 3, 255, -1) # Draw filled contour in mask
-    # # out = np.zeros_like(binary) # Extract out the object and place into output image
-    # # out[mask == 255] = binary[mask == 255]
-    
-    # # (y, x) = np.where(mask == 255)
-    # # (topy, topx) = (np.min(y), np.min(x))
-    # # (bottomy, bottomx) = (np.max(y), np.max(x))
-    # # out = out[topy:bottomy+1, topx:bottomx+1]
+
     return list
 
 img = cv2.imread('lic.jpg')
 list_crop = crop_num(img)
-for i in range(8):
-    cv2.imwrite("bw_3_"+str(i)+".png",list_crop[i])
 
-# img = cv2.imread('bw_1.jpg')
-# img_crop = img[list_crop[0][0]:list_crop[0][1],list_crop[0][2]:list_crop[0][3]]
-# cv2.imwrite("bw_3.png",img_crop)
+list_nb =[]
+num = 0
+for i in list_crop:
+    cv2.imwrite("bw_3_"+str(num)+".png",i)
+    blur = cv2.blur(i,(3,3))
+    cv2.imwrite("bw_4_"+str(num)+".png",blur)
+    for j in range(len(i)):
+        for k in range(len(i[j])):
+            if j == 0 or k == 0 or j == len(i)-1 or k == len(i[j]) - 1:
+                continue
+            if blur[j][k] <= 125 and (i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1] == 255):
+            # if ((i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1]) == 255):
+                i[j][k] = 0
+    cv2.imwrite("bw_5_"+str(num)+".png",i)
+    list_nb.append(i)
+    num += 1
+
+# list_nb = sum(list_nb , list_crop)
+# print(len(list_nb))
+   
+
+
