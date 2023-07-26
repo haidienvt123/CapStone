@@ -25,7 +25,7 @@ class database:
     image2.save(image_bytes_2, format='JPEG')
     img2 = base64.b64encode(image_bytes_2.getvalue()).decode()
     image_bytes_crop = io.BytesIO()
-    image_bytes_crop.save(image_bytes_crop, format='JPEG')
+    image_crop.save(image_bytes_crop, format='JPEG')
     img_crop = base64.b64encode(image_bytes_crop.getvalue()).decode()
     query = { "id_card": str(id_card), "lic": str(lic), "color": color, "image1": img1, "image2": img2, "image_crop": img_crop}
     self.col.insert_one(query)
