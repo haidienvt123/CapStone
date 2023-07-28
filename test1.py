@@ -4,7 +4,7 @@ from tkinter.filedialog import askopenfile
 from PIL import Image, ImageTk
 import numpy as np
 import cv2
-from DL_model import license_id,color_detector,car_detector
+from DL_model import license_id,color_detector,car_detector,dehaze_processing
 
 license_plate=license_id()
 color = color_detector()
@@ -63,9 +63,15 @@ class App:
     #take image and opendoor
     def det_col(self):
         car_bbox_image,car_crop_image=car.car_detect(self.cv_img)
-        img = cv2.cvtColor(car_crop_image,cv2.COLOR_BGR2RGB)
-        self.color = color.take_color(img)
+        # img = cv2.cvtColor(car_crop_image,cv2.COLOR_BGR2RGB)
+        # return_img=dehaze_processing(car_crop_image)
+        self.color = color.take_color(car_crop_image)
         self.show_color.config(text= self.color)
+        bbox_image_show = cv2.cvtColor(car_bbox_image,cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(bbox_image_show)
+        image=image.resize((600, 400))
+        self.image_show1 = ImageTk.PhotoImage(image)
+        self.image1.create_image(0, 0, image = self.image_show1, anchor = tkinter.NW)
 
     def det_img(self):
         id_str,bbox_image,crop_image=license_plate.license_detect(self.cv_img)
