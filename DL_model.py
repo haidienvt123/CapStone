@@ -58,8 +58,8 @@ class license_id():
             if len(list_recognition)<2:
                temp=list_recognition[0][0].split('-')
                list_recognition=[(str(temp[1]),1),(str(temp[0]),1)] #testing
-         else:
-            list_recognition = ['0','0']
+            else:
+               list_recognition = ['0','0']
 
          bbox_image=copy.deepcopy(img)
          cv2.rectangle(bbox_image,(int(cordinate[0]),int(cordinate[1])),

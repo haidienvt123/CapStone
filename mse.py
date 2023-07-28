@@ -12,8 +12,8 @@ def mse(img1, img2):
       return 1     
    return 0
 
-img1 = cv2.imread('img/bw_5_4.png')
-img2 = cv2.imread('img/bw_5_3.png')
+img1 = cv2.imread('img/bw_4_1.png')
+img2 = cv2.imread('img/bw_4_6.png')
 img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
 img1 = img1/255

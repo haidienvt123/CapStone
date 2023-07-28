@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import sys
+from DL_model import license_id
 
 sys.setrecursionlimit(10000)
 
@@ -74,15 +75,15 @@ def crop_num(image):
     min_h = 10
     min_w = 6
     list = crop(bina)
-
     return list
+
 def nb(list_crop):
     list_nb =[]
     num = 0
     for i in list_crop:
-        cv2.imwrite("bw_3_"+str(num)+".png",i)
+        cv2.imwrite("bw_2_"+str(num)+".png",i)
         blur = cv2.blur(i,(3,3))
-        cv2.imwrite("bw_4_"+str(num)+".png",blur)
+        cv2.imwrite("bw_3_"+str(num)+".png",blur)
         for j in range(len(i)):
             for k in range(len(i[j])):
                 if j == 0 or k == 0 or j == len(i)-1 or k == len(i[j]) - 1:
@@ -90,16 +91,19 @@ def nb(list_crop):
                 if blur[j][k] <= 125 and (i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1] == 255):
                 # if ((i[j-1][k]+i[j+1][k]+i[j][k-1]+i[j][k+1]) == 255):
                     i[j][k] = 0
-        cv2.imwrite("bw_5_"+str(num)+".png",i)
+        cv2.imwrite("bw_4_"+str(num)+".png",i)
         list_nb.append(i)
         num += 1
     return list_nb
 
-img = cv2.imread('lic.jpg')
-list_crop = crop_num(img)
+license_plate=license_id()
+img = cv2.imread('test_data/CarLongPlate68.jpg')
+id_str,bbox_image,crop_image=license_plate.license_detect(img)
+cv2.imwrite("lic.jpg",crop_image)
+list_crop = crop_num(crop_image)
 
-
-# list_nb = sum(list_nb , list_crop)
+list_nb=nb(list_crop)
+# list_nb = sum(list_crop , list_crop)
 # print(len(list_nb))
    
 

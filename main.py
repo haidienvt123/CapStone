@@ -109,7 +109,10 @@ class App:
         ret_2, frame_2 = self.vid_1.get_frame()
         
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
-        self.lic_in = str(id_str[1][0] + '_' + id_str[0][0])
+        if (len(id_str) == 1):
+            self.lic_in = str(id_str[1][0])
+        else:
+            self.lic_in = str(id_str[1][0] + '_' + id_str[0][0])
         
         car_bbox_image,car_crop_image=car.car_detect(frame_2)
         self.color_in = color.take_color(car_crop_image)
@@ -154,7 +157,10 @@ class App:
         ret_2, frame_2 = self.vid_1.get_frame()
         
         id_str,bbox_image,crop_image=license_plate.license_detect(frame_1)
-        self.lic_out = str(id_str[1][0] + '_' + id_str[0][0])
+        if (len(id_str) == 1):
+            self.lic_out = str(id_str[1][0])
+        else:
+            self.lic_out = str(id_str[1][0] + '_' + id_str[0][0])
         
         car_bbox_image,car_crop_image=car.car_detect(frame_2)
         self.color_out = color.take_color(car_crop_image)
@@ -169,7 +175,7 @@ class App:
         self.button_color_in.config(text="Color in: "+self.color_in)
         self.button_color_out.config(text="Color out: "+self.color_out)
 
-        if (self.lic_out == self.lic_in):
+        if (self.lic_out == self.lic_in and self.color_in == self.color_out):
             self.solution = 'Match'
             self.button_solution.config(text=self.solution, background='green', activebackground='green')
 
@@ -189,6 +195,7 @@ class App:
         if (arduinoData.inWaiting()!=0):
             dataPacket = arduinoData.readline()
             dataPacket = str(dataPacket,'utf-8')
+            print(dataPacket)
             self.uid = dataPacket.strip('\r\n')
             # os.path.isfile("photo/"+self.uid+".png")
 
